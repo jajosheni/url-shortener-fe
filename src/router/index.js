@@ -7,6 +7,12 @@ const routes = [
     component: () => import('@/views/Homepage.vue'),
   },
   {
+    path: '/404',
+    name: 'Not Found',
+    component: () => import('@/views/NotFound.vue'),
+    meta: { statusCode: 404 },
+  },
+  {
     path: '/:id',
     name: 'Redirect',
     component: () => import('@/views/Redirect.vue'),
