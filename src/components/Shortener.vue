@@ -24,9 +24,7 @@ const url = ref('');
 const shortenedUrl = ref('');
 
 const submitForm = async () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  const response = await fetch(`${apiUrl}/shorten`, {
+  const response = await fetch('api/shorten', {
     method: 'POST',
     body: JSON.stringify({ fullUrl: url.value }),
     headers: { 'Content-Type': 'application/json' },
