@@ -9,6 +9,7 @@
       />
       <button type="submit" class="submit-button">Shorten</button>
     </form>
+    <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
     <div v-if="shortenedUrl" class="result">
       Your shortened URL is:
       <a :href="shortenedUrl" class="shortened-url">{{ shortenedUrl }}</a>
@@ -18,26 +19,61 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const url = ref('');
 const shortenedUrl = ref('');
+const errorMessage = ref('');
+
+const validateUrl = (value) => {
+  try {
+    new URL(value);
+  } catch (_) {
+    return false;
+  }
+
+  return true;
+};
+
+watch(url, () => {
+  shortenedUrl.value = '';
+});
 
 const submitForm = async () => {
-  const response = await fetch('api/shorten', {
-    method: 'POST',
-    body: JSON.stringify({ fullUrl: url.value }),
-    headers: { 'Content-Type': 'application/json' },
-  });
+  if (!validateUrl(url.value)) {
+    errorMessage.value = 'Please enter a valid URL.';
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 3000); // Reset error message after 3 seconds
+    return;
+  }
 
-  /**
-   * Represents the data returned from the server.
-   * @typedef {Object} ServerResponseData
-   * @property {string} shortUrl - The shortened URL.
-   */
-  /** @type {ServerResponseData} */
-  const data = await response.json();
-  shortenedUrl.value = data.shortUrl;
+  try {
+    const response = await fetch('api/shorten', {
+      method: 'POST',
+      body: JSON.stringify({ fullUrl: url.value }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    /**
+     * Represents the data returned from the server.
+     * @typedef {Object} ServerResponseData
+     * @property {string} shortUrl - The shortened URL.
+     */
+    /** @type {ServerResponseData} */
+    const data = await response.json();
+    shortenedUrl.value = data.shortUrl;
+    errorMessage.value = '';
+  } catch (error) {
+    errorMessage.value = 'An error occurred. Please try again.';
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 3000); // Reset error message after 3 seconds
+  }
 };
 
 const copyToClipboard = async () => {
@@ -114,5 +150,10 @@ const copyToClipboard = async () => {
   background: #007bff; /* adjust this color as needed */
   color: white; /* adjust this color as needed */
   cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin: 1rem 0;
 }
 </style>
