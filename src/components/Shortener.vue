@@ -13,7 +13,9 @@
     <div v-if="shortenedUrl" class="result">
       Your shortened URL is:
       <a :href="shortenedUrl" class="shortened-url">{{ shortenedUrl }}</a>
-      <button @click="copyToClipboard" class="copy-button">Copy</button>
+      <button @click="copyToClipboard" class="copy-button">
+        {{ copyMsg }}
+      </button>
     </div>
   </div>
 </template>
@@ -24,6 +26,7 @@ import { ref, watch } from 'vue';
 const url = ref('');
 const shortenedUrl = ref('');
 const errorMessage = ref('');
+const copyMsg = ref('');
 
 const validateUrl = (value) => {
   try {
@@ -37,6 +40,7 @@ const validateUrl = (value) => {
 
 watch(url, () => {
   shortenedUrl.value = '';
+  copyMsg.value = '';
 });
 
 const submitForm = async () => {
@@ -66,6 +70,7 @@ const submitForm = async () => {
      */
     /** @type {ServerResponseData} */
     const data = await response.json();
+    copyMsg.value = 'Copy';
     shortenedUrl.value = data.shortUrl;
     errorMessage.value = '';
   } catch (error) {
@@ -78,6 +83,7 @@ const submitForm = async () => {
 
 const copyToClipboard = async () => {
   await navigator.clipboard.writeText(shortenedUrl.value);
+  copyMsg.value = 'Copied';
 };
 </script>
 
@@ -134,12 +140,12 @@ const copyToClipboard = async () => {
 }
 
 .shortened-url {
-  color: #007bff; /* adjust this color as needed */
+  color: #007bff;
   text-decoration: none;
 }
 
 .shortened-url:hover {
-  color: #0056b3; /* adjust this color as needed */
+  color: #0056b3;
 }
 
 .copy-button {
@@ -147,9 +153,17 @@ const copyToClipboard = async () => {
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   border: none;
-  background: #007bff; /* adjust this color as needed */
-  color: white; /* adjust this color as needed */
+  background: var(--color-text);
+  color: white;
   cursor: pointer;
+}
+
+.copy-button:hover {
+  background: var(--color-primary);
+}
+
+.copy-button:active {
+  background: var(--color-primary-dark);
 }
 
 .error {
