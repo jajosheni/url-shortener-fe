@@ -14,7 +14,6 @@
       <a :href="shortenedUrl" class="shortened-url">{{ shortenedUrl }}</a>
       <button @click="copyToClipboard" class="copy-button">Copy</button>
     </div>
-    <pre>{{ apiUrl }}</pre>
   </div>
 </template>
 
@@ -25,13 +24,22 @@ const url = ref('');
 const shortenedUrl = ref('');
 
 const submitForm = async () => {
-  const response = await fetch('/shorten', {
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  const response = await fetch(`${apiUrl}/shorten`, {
     method: 'POST',
-    body: JSON.stringify({ url: url.value }),
+    body: JSON.stringify({ fullUrl: url.value }),
     headers: { 'Content-Type': 'application/json' },
   });
+
+  /**
+   * Represents the data returned from the server.
+   * @typedef {Object} ServerResponseData
+   * @property {string} shortUrl - The shortened URL.
+   */
+  /** @type {ServerResponseData} */
   const data = await response.json();
-  shortenedUrl.value = data.shortenedUrl;
+  shortenedUrl.value = data.shortUrl;
 };
 
 const copyToClipboard = async () => {
